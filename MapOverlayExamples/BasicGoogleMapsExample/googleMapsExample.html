@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Google Tile Map Example with Overlay Picker/title>
+    <meta charset="utf-8">
+    <style type="text/css">
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #map {
+        height: 100%;
+      }
+    </style>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=ADD_YOUR_OWN_GOOGLE_API_KEY"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+  </head>
+  <body>
+    <!--Create the div to hold the map.-->
+    <div id='map'></div>
+    <script type="text/javascript">
+      var license = "?app_id=ADD_YOUR_OWN_ID&app_key=ADD_YOUR_OWN_KEY";
+      //These options configure the setup of the map.
+      var mapOptions = {
+        center: {
+          lat: 40.34654412118006,
+          lng: -98.39355468749999
+        },
+        zoom: 4,
+        mapTypeControl: true,
+        zoomControl: true,
+        scaleControl: true,
+        streetViewControl: false,
+        rotateControl: false,
+        mapTypeControlOptions: {
+          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+        }
+      };
+
+      // Array of layers.
+      availLayers = [];
+
+      //Create the variable for the main map itself.
+      var map;
+
+      //When the page loads, the line below calls the function
+      //below called 'loadMap' to load up the map.
+      google.maps.event.addDomListener(window, 'load', loadMap);
+
+      // The layerControl adds a control to the map that contains the layer
+      // options. This constructor takes the control DIV as an argument.
+      function layerControl(controlDiv, map, options) {
+
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '3px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.marginBottom = '22px';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Layers';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '16px';
+        controlText.style.lineHeight = '38px';
+        controlText.style.paddingLeft = '5px';
+        controlText.style.paddingRight = '5px';
+        controlText.innerHTML = '<select class="overlayPicker">'
+                              + '<option value="0">No layers.</options>'
+                              + options +'</select>';
+        controlUI.appendChild(controlText);
+      };
+
+      // THE MAIN FUNCTION THAT IS CALLED WHEN THE WEB PAGE LOADS
+      function loadMap() {
+        map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+        getLayers();
+      };
+
+      function getLayers() {
+        var layerOptions = '';
+        var index;
+
+        var earl = 'http://tiles.clearapis.com/v1.0/layer_index' + license;
+
+        $.get(earl, function() {
+          index = 1;
+          for(domain_name in data.display_intervals[0].layers) {
+            layers = data.display_intervals[0].layers[domain_name];
+            layerOptions += '<optgroup label="' + domain_name + '">';
+            for(layer_name in layers){
+              var layer = layers[layer_name];
+              var tile_url = layer.tile_url;
+
+              var lname = layer_name + ' :: ' + layer.valid_time;
+              //Add to dropdown menu
+              layerOptions += '<option value="'
+                            + index + '">' + lname + '</option>';
+
+              // Create overlay
+              availLayers[index] = {
+                url: tile_url,
+                type: layer.layer_type,
+                l: license,
+                getTileUrl: function(){},
+                isPng: true,
+                opacity: 0.65
+              };
+
+              availLayers[index].getTileUrl = function(coord, zoom) {
+                return this.url + zoom + '/' + coord.x + '/' + coord.y + '.'
+                       + this.type + this.l;
+              };
+              index++;
+            }
+            layerOptions += '</optgroup>';
+          }
+
+          // Create the DIV to hold the control and call the layerControl()
+          // constructorpassing in this DIV.
+          var controlDiv = document.createElement('div');
+          layerControl(controlDiv, map, layerOptions);
+
+          controlDiv.index = 1;
+          map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
+        }).fail(function(jqXHR) {
+          alert('Status Code: ' + jqXHR.status + '\n' +
+                 jqXHR.responseText);
+        });
+      };
+
+      $(document).ready(function() {
+        var control;
+        $('#map').on('click .overlayPicker', function() {
+          control = $('.overlayPicker');
+          control.data('prev', control.val());
+        });
+        $('#map').on('change .overlayPicker', function() {
+          var index = control.val();
+
+          // Clear map of previously selected layer.
+          map.overlayMapTypes.setAt(control.data('prev'), null);
+
+          // Add newly selected layer.
+          if (index != 0) {
+            map.overlayMapTypes.setAt(index,
+              new google.maps.ImageMapType(availLayers[index]));
+          }
+
+          // Set newly selected layer as previous
+          control.data('prev', index);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ClearAg Test Map With Animation</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"/>
+    <link rel="stylesheet" type="text/css" href="./lib/jquery.datetimepicker.css"/>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+    <script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="./lib/jquery.datetimepicker.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="http://momentjs.com/downloads/moment.min.js"></script>
+  </head>
+
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0px !important;
+      font: Arial, Helvetica, sans-serif;
+    }
+
+    #map {
+      width: 100%;
+      position: absolute;
+      top: 0px;
+      bottom: 0px;
+    }
+
+    #non_map_div {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: white
+    }
+
+    .info {
+      padding: 6px 8px;
+      font: 16px/18px Arial, Helvetica, sans-serif;
+      background: white;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+
+    .info h4 {
+      margin: 0 0 5px;
+      color: #777;
+    }
+  </style>
+
+  <body onload="resize();resetParameters()" onresize="resize()">
+    <div id="map" style="visibility:hidden;"></div>
+    <div id="non_map_div">
+      <form id="input">
+        <fieldset>
+          <input type="range" id="intervalSlider" disabled=true value=0 oninput="sliderMove()">
+          <button type="button" id="stepBack" disabled=true onclick="decrementInterval()">&#9664;</button>
+          <button type="button" id="stepForward" disabled=true onclick="incrementInterval()">&#9654;</button>
+          <button type="button" id="startStop" disabled=true onclick="StartStop()">&#9654;/&#8214;</button><br>
+          Display Start: <input type=text id="displayStart" class="datetimepicker" value=""><br>
+          Display Range: <input type=text id="displayRange" value=""><br>
+          Display Interval: <input type=text id="intervalRange" value=""><br>
+          <button type="button" id="submit_button" onclick="setParameters()">Submit</button>
+          <button type="reset" id ="resetButton" onclick="resetParameters()">Reset</button>
+        </fieldset>
+      </form>
+    </div>
+  </body>
+  <script src="magic.js"></script>
+</html>

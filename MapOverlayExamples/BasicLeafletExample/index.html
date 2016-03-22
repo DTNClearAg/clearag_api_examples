@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>'Hello World' ClearAg Tile Layer Index</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"/>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  </head>
+
+  <style>
+    #map {
+      width: 100%;
+      position: absolute;
+      top: 0px;
+      bottom: 0px;
+    }
+  </style>
+
+  <body>
+    <div id="map"></div>
+  </body>
+  <script>
+    // var license = '?app_id=YOUR_CLEARAG_ID_HERE&app_key=YOUR_CLEARAG_KEY_HERE';
+    var layerFilter = '&layer_filter=air_temp';
+    var earl = 'http://tiles.clearapis.com/v1.0/layer_index'
+             + license
+             + layerFilter;
+
+    // Leaflet map object
+    var map = L.map('map', {
+      zoom: 4,
+      center: [40.34654412118006, -98.39355468749999], // Centres map on US.
+    });
+
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://osm.org/copyright">' +
+                   'OpenStreetMap</a> contributors',
+      maxZoom: 15,
+      zIndex: 1
+    }).addTo(map);
+
+    var request = new XMLHttpRequest();
+    request.open('GET', earl, true);
+
+    request.onload = function() {
+      if (request.status == 200) { // Success
+        var data = JSON.parse(request.responseText);
+
+        var layer = data.display_intervals[0].layers.contigus.air_temp;
+        map.addLayer(L.tileLayer(
+          layer.tile_url +
+          '{z}/{x}/{y}.' +
+          layer.layer_type +
+          license,
+          {
+            attribution: 'hail data &copy;'
+                         + '<a href="//www.iteris.com">'
+                         + 'Iteris</a>',
+            zIndex: 3,
+            opacity: 0.65
+          }
+        ));
+      } else { // We reached our target server, but it returned an error
+        alert('Status Code: ' + request.status + '\n' + request.response);
+      }
+    };
+
+    request.onerror = function() {
+      alert('A connection error of some sort occured.');
+    };
+
+    request.send();
+  </script>
+</html>
