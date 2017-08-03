@@ -20,9 +20,9 @@
     <div id="map"></div>
   </body>
   <script>
-    // var license = '?app_id=YOUR_CLEARAG_ID_HERE&app_key=YOUR_CLEARAG_KEY_HERE';
-    var layerFilter = '&layer_filter=air_temp';
-    var earl = 'http://tiles.clearapis.com/v1.0/layer_index'
+    var license = '?app_id=16cb3472&app_key=cfd1f9f7694162c427c5bbc48fedce9c';
+    var layerFilter = '&layer_filter=soil_moisture';
+    var earl = 'http://tiles.eu.clearapis.com/v1.0/layer_index'
              + license
              + layerFilter;
 
@@ -45,8 +45,9 @@
     request.onload = function() {
       if (request.status == 200) { // Success
         var data = JSON.parse(request.responseText);
+        // console.log(data)
 
-        var layer = data.display_intervals[0].layers.contigus.air_temp;
+        var layer = data.display_intervals[0].layers.global.soil_moisture;
         map.addLayer(L.tileLayer(
           layer.tile_url +
           '{z}/{x}/{y}.' +

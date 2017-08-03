@@ -1,4 +1,4 @@
-# Basic Google Maps Example
+#Google Maps ExampleS
 
 A simple example showing one possible way to use ClearAg tile layer with the Google Maps API.
 
