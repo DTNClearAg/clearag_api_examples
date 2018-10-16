@@ -8,7 +8,6 @@ import json
 import urllib
 
 _URL_BASE = 'https://ag.us.clearapis.com/v1.0/accounts'
-_DUMP_FILE_NAME = 'fields_info'
 
 def main():
     """Main function"""
@@ -55,7 +54,7 @@ def create_fields_from_file(account_id, user_id, locations_file_name):
 
     fields = _create_fields(account_id, user_id, locations)
 
-    _dump_field_ids(_DUMP_FILE_NAME, fields, account_id, user_id)
+    _dump_field_ids(locations_file_name, fields, account_id, user_id)
 # End def
 
 def _get_locations(locations_file_name):
@@ -67,11 +66,14 @@ def _get_locations(locations_file_name):
 
         for row in csv_reader:
             locations.append({
-                'name': '%s_%s' % (row[0], row[1]),
-                'lat': row[2],
-                'lon': row[3]
+                'name': row[0],
+                'lat': row[1],
+                'lon': row[2],
+                'acres': row[3]
             })
         # End for
+
+        locations_input.close()
     # End with
 
     return locations
@@ -81,19 +83,20 @@ def _create_fields(account_id, user_id, locations_input):
     locations_output = list()
 
     for location in locations_input:
-        url = '%s/field/create?account_id=%s&user_id=%s&acres=1&latitude=%s&longitude=%s&name=%s' % (_URL_BASE, account_id, user_id, location['lat'], location['lon'], location['name'])
+        url = '%s/field/create?account_id=%s&user_id=%s&acres=%s&latitude=%s&longitude=%s&name=%s' % (_URL_BASE, account_id, user_id, location['acres'], location['lat'], location['lon'], location['name'])
 
         response = urllib.urlopen(url)
 
         if response.getcode() == 400:
-            print ('400 Error\n'
+            print ('400 Error:\n'
                    '  %s' % url)
 
         locations_output.append({
             'name': location['name'],
             'field_id': response.read(),
             'lat': location['lat'],
-            'lon': location['lon']
+            'lon': location['lon'],
+            'acres': location['acres']
         })
     # End for
 
@@ -101,14 +104,16 @@ def _create_fields(account_id, user_id, locations_input):
 # End def
 
 def _dump_field_ids(dump_file_name, fields, account_id, user_id):
-    with open('%s' % dump_file_name, 'w') as accounts_dump:
-        json.dump({'account_id': account_id, 'user_id': user_id, 'fields': fields},
-                  accounts_dump,
-                  separators=(', ', ': '),
-                  sort_keys=True,
-                  indent=4)
+    with open(dump_file_name, 'w') as accounts_dump:
+        csv_writer = csv.writer(accounts_dump)
+        header = ['field_name', 'latitude', 'longitude', 'acres', 'field_id']
+        csv_writer.writerow(header)
 
-        print 'Field IDs dumped into ./%s.json' % dump_file_name
+        for field in fields:
+            row = [field['name'], field['lat'], field['lon'], field['acres'], field['field_id']]
+            csv_writer.writerow(row)
+
+        print 'Field IDs exported into ./%s' % dump_file_name
     # End with
 # End def
 
