@@ -6,3 +6,8 @@ For all examples you will need to use your own API access credentials. All files
 ```javascript
 var license = "?app_id=YOUR_ID_HERE&app_key=YOUR_KEY_HERE";
 ```
+
+```python
+APP_ID = 'YOUR_APP_ID_HERE'
+APP_KEY = 'YOUR_APP_KEY_HERE'
+```

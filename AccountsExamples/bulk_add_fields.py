@@ -7,6 +7,9 @@ import csv
 import json
 import urllib
 
+APP_ID = '98fdd508'
+APP_KEY = '5d9e12d119c38abb497a6fbd6756d03f'
+
 _URL_BASE = 'https://ag.us.clearapis.com/v1.0/accounts'
 
 def main():
@@ -40,6 +43,8 @@ def _get_args():
                                help='Account ID to use')
     parser_remove.add_argument('user_id',
                                help='The user ID to use')
+    parser_remove.add_argument('locations_file_name',
+                            help='The name of the location list file')
     parser_remove.set_defaults(func=_remove_fields_from_file)
 
     return parser.parse_args()
@@ -83,12 +88,13 @@ def _create_fields(account_id, user_id, locations_input):
     locations_output = list()
 
     for location in locations_input:
-        url = '%s/field/create?account_id=%s&user_id=%s&acres=%s&latitude=%s&longitude=%s&name=%s' % (_URL_BASE, account_id, user_id, location['acres'], location['lat'], location['lon'], location['name'])
+        url = '%s/field/create?app_id=%s&app_key=%s&account_id=%s&user_id=%s&acres=%s&latitude=%s&longitude=%s&name=%s' % (_URL_BASE, APP_ID, APP_KEY, account_id, user_id, location['acres'], location['lat'], location['lon'], location['name'])
 
+        print url
         response = urllib.urlopen(url)
 
-        if response.getcode() == 400:
-            print ('400 Error:\n'
+        if response.getcode() != 200:
+            print ('%s Error:\n' % response.getcode(),
                    '  %s' % url)
 
         locations_output.append({
@@ -118,24 +124,46 @@ def _dump_field_ids(dump_file_name, fields, account_id, user_id):
 # End def
 
 def _remove_fields_from_file(args):
-    remove_fields_from_file(args.account_id, args.user_id)
+    remove_fields_from_file(args.account_id, args.user_id, args.locations_file_name)
 # End def
 
-def remove_fields_from_file(account_id, user_id):
-    with open('fields_info.json', 'r') as input_file:
-        fields_info = json.load(input_file)
+def remove_fields_from_file(account_id, user_id, locations_file_name):
+    locations = list()
+    with open(locations_file_name, 'r') as input_file:
+        csv_reader = csv.reader(input_file)
+        csv_reader.next()
 
-        for field in fields_info['fields']:
-            url = '%s/field/delete/%s?account_id=%s&user_id=%s' % (_URL_BASE,
-                                                                   field['field_id'],
-                                                                   account_id,
-                                                                   user_id)
+        for row in csv_reader:
+            locations.append({
+                'name': row[0],
+                'lat': row[1],
+                'lon': row[2],
+                'acres': row[3],
+                'field_id': row[4]
+            })
+
+        for field in locations:
+            url = '%s/field/delete/%s?app_id=%s&app_key=%s&account_id=%s&user_id=%s' % (_URL_BASE, field['field_id'], APP_ID, APP_KEY, account_id, user_id)
             response = urllib.urlopen(url)
 
-            if response.getcode() == 400:
-                print ('400 Error\n'
+            if response.getcode() != 200:
+                print ('%s Error:\n' % response.getcode(),
                        '  %s' % url)
+            else:
+                print ('Removed {} | {}'.format(field['name'], field['field_id']))
             # End if
+        # End for
+        input_file.close()
+    # End with
+
+    with open(locations_file_name, 'w') as fields_dump:
+        csv_writer = csv.writer(fields_dump)
+        header = ['field_name', 'latitude', 'longitude', 'acres']
+        csv_writer.writerow(header)
+
+        for field in locations:
+            row = [field['name'], field['lat'], field['lon'], field['acres']]
+            csv_writer.writerow(row)
         # End for
     # End with
 # End def
