@@ -7,8 +7,8 @@ import csv
 import json
 import urllib
 
-APP_ID = '98fdd508'
-APP_KEY = '5d9e12d119c38abb497a6fbd6756d03f'
+APP_ID = ''
+APP_KEY = ''
 
 _URL_BASE = 'https://ag.us.clearapis.com/v1.0/accounts'
 
