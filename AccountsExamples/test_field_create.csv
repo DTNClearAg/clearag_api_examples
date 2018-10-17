@@ -1,4 +1,4 @@
-field_name,latitude,longitude,acres,field_id
-field1,43,-90,10,85868daf-3b98-4510-b428-e13042966f07
-field2,44,-91,10,787681b5-5f45-4946-8862-57ac826fd681
-field3,45,-92,10,7490fd20-d88f-4698-97e4-0659a58dbe5b
+field_name,latitude,longitude,acres
+field2,44,-91,10
+field3,45,-92,10
+field1,43,-90,10

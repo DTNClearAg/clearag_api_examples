@@ -7,8 +7,8 @@ import csv
 import json
 import urllib
 
-APP_ID = ''
-APP_KEY = ''
+APP_ID = '98fdd508'
+APP_KEY = '1b89053c245aeceb7df6cac437e2a8ca'
 
 _URL_BASE = 'https://ag.us.clearapis.com/v1.0/accounts'
 
@@ -128,29 +128,30 @@ def _remove_fields_from_file(args):
 # End def
 
 def remove_fields_from_file(account_id, user_id, locations_file_name):
-    locations = list()
+    locations = {}
     with open(locations_file_name, 'r') as input_file:
         csv_reader = csv.reader(input_file)
         csv_reader.next()
 
         for row in csv_reader:
-            locations.append({
-                'name': row[0],
+            locations[row[0]] = {
                 'lat': row[1],
                 'lon': row[2],
                 'acres': row[3],
-                'field_id': row[4]
-            })
+                'field_id': row[4],
+                'deleted': False
+            }
 
-        for field in locations:
-            url = '%s/field/delete/%s?app_id=%s&app_key=%s&account_id=%s&user_id=%s' % (_URL_BASE, field['field_id'], APP_ID, APP_KEY, account_id, user_id)
+        for field in sorted(locations.keys()):
+            url = '%s/field/delete/%s?app_id=%s&app_key=%s&account_id=%s&user_id=%s' % (_URL_BASE, locations[field]['field_id'], APP_ID, APP_KEY, account_id, user_id)
             response = urllib.urlopen(url)
 
             if response.getcode() != 200:
                 print ('%s Error:\n' % response.getcode(),
                        '  %s' % url)
             else:
-                print ('Removed {} | {}'.format(field['name'], field['field_id']))
+                locations[field]['deleted'] = True
+                print ('Removed {} | {}'.format(field, locations[field]['field_id']))
             # End if
         # End for
         input_file.close()
@@ -162,7 +163,10 @@ def remove_fields_from_file(account_id, user_id, locations_file_name):
         csv_writer.writerow(header)
 
         for field in locations:
-            row = [field['name'], field['lat'], field['lon'], field['acres']]
+            if locations[field]['deleted']:
+                row = [field, locations[field]['lat'], locations[field]['lon'], locations[field]['acres']]
+            else:
+                row = [field, locations[field]['lat'], locations[field]['lon'], locations[field]['acres'], locations[field]['field_id'], 'Failed to Delete']
             csv_writer.writerow(row)
         # End for
     # End with
