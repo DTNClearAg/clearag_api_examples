@@ -2,6 +2,8 @@
 
 This Python script takes a CSV file of locations and creates new fields within the [ClearAG Accounts API](https://docs.clearag.com/documentation/Accounts_API/latest). The new Field UUIDs will be added to the input file.  This script can also read that file to remove fields.
 
+API Credentials, account_id, and user_id must be added at top of bulk_add_fields.py
+
 Required input arguments are based on required parameters from the [Create Field API](https://docs.clearag.com/documentation/Accounts_API/latest#_create_field_v1_0).  The input CSV file must be in the following order:
 ```
 field_name,latitude,longitude,acres
@@ -9,8 +11,8 @@ field_name,latitude,longitude,acres
 
 Example command line call:
 ```
-python bulk_add_fields.py add <account_id_placeholder> <user_id_placeholder> <input_csv_placeholder>
-python bulk_add_fields.py add 0ab7ef73-4321-47e6-995f-dc0bae1feaed dba28ce2-bbd3-1234-9b33-c708771a7b08 test_field_create.csv
+python bulk_add_fields.py add <input_csv_placeholder>
+python bulk_add_fields.py add test_field_create.csv
 ```
 
 

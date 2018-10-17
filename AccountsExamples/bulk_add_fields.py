@@ -9,6 +9,8 @@ import urllib
 
 APP_ID = ''
 APP_KEY = ''
+ACCOUNT_ID = ''
+USER_ID = ''
 
 _URL_BASE = 'https://ag.us.clearapis.com/v1.0/accounts'
 
@@ -28,10 +30,6 @@ def _get_args():
     # Add parser
     parser_add = subparsers.add_parser('add',
                                        help='Create fields from a list of locations')
-    parser_add.add_argument('account_id',
-                            help='Account ID to use')
-    parser_add.add_argument('user_id',
-                            help='The user ID to use')
     parser_add.add_argument('locations_file_name',
                             help='The name of the location list file')
     parser_add.set_defaults(func=_create_fields_from_file)
@@ -39,10 +37,6 @@ def _get_args():
     # Remove parser
     parser_remove = subparsers.add_parser('remove',
                                           help='Removes all fields in the "fields_info.json" file.')
-    parser_remove.add_argument('account_id',
-                               help='Account ID to use')
-    parser_remove.add_argument('user_id',
-                               help='The user ID to use')
     parser_remove.add_argument('locations_file_name',
                             help='The name of the location list file')
     parser_remove.set_defaults(func=_remove_fields_from_file)
@@ -51,7 +45,7 @@ def _get_args():
 # End def
 
 def _create_fields_from_file(args):
-    create_fields_from_file(args.account_id, args.user_id, args.locations_file_name)
+    create_fields_from_file(ACCOUNT_ID, USER_ID, args.locations_file_name)
 # End def
 
 def create_fields_from_file(account_id, user_id, locations_file_name):
@@ -124,7 +118,7 @@ def _dump_field_ids(dump_file_name, fields, account_id, user_id):
 # End def
 
 def _remove_fields_from_file(args):
-    remove_fields_from_file(args.account_id, args.user_id, args.locations_file_name)
+    remove_fields_from_file(ACCOUNT_ID, USER_ID, args.locations_file_name)
 # End def
 
 def remove_fields_from_file(account_id, user_id, locations_file_name):
